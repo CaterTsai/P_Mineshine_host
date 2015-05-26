@@ -11,7 +11,6 @@ void MineshineTheatre::setupTheatre()
 	//Scenes
 	//-------------------------------------------------
 	_Director.AddScenes(NAME_MGR::S_MAIN);
-	_Director.AddScenes(NAME_MGR::S_TYPE);
 	_Director.AddScenes(NAME_MGR::S_MV);
 	_Director.AddScenes(NAME_MGR::S_KV);
 #pragma endregion
@@ -21,14 +20,14 @@ void MineshineTheatre::setupTheatre()
 	//Actor
 	//-------------------------------------------------
 	//S_MAIN
-	_Director.AddActor(new ofxImageActor(NAME_MGR::A_MAIN_BG, "images/main_bg.jpg"));
+	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_MAIN_LOOP, "videos/open.mov", ofPtr<ofxHapPlayer>(new ofxHapPlayer)));
 	_Director.AddActor(new ofxDynamicImageActor(NAME_MGR::A_QR));
+	
+	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_MENU_LOOP, "videos/menu.mov", ofPtr<ofxHapPlayer>(new ofxHapPlayer), eBLEND_ALPHA));
 
-	//S_TYPE
-	_Director.AddActor(new ofxImageActor(NAME_MGR::A_TYPE_BG, "images/type_bg.jpg"));
-	_Director.AddActor(new ofxImageActor(NAME_MGR::A_TYPE_HOT, "images/type_1.jpg"));
-	_Director.AddActor(new ofxImageActor(NAME_MGR::A_TYPE_WARM, "images/type_2.jpg"));
-	_Director.AddActor(new ofxImageActor(NAME_MGR::A_TYPE_FRESH, "images/type_3.jpg"));
+	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_TYPE_HOT_LOOP, "videos/type_hot.mov", ofPtr<ofxHapPlayer>(new ofxHapPlayer), eBLEND_ALPHA));
+	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_TYPE_WARM_LOOP, "videos/type_warm.mov", ofPtr<ofxHapPlayer>(new ofxHapPlayer), eBLEND_ALPHA));
+	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_TYPE_FRESH_LOOP, "videos/type_fresh.mov", ofPtr<ofxHapPlayer>(new ofxHapPlayer), eBLEND_ALPHA));
 		
 	//S_MV
 	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_MV_1, "mv/1.mp4", ofPtr<ofGstVideoPlayer>(new ofGstVideoPlayer)));
@@ -47,15 +46,16 @@ void MineshineTheatre::setupTheatre()
 	
 	//S_KV
 	_Director.AddActor(new ofxImageActor(NAME_MGR::A_KV, "images/kv.jpg"));
-
 #pragma endregion
 
 #pragma region Plane
 	//-------------------------------------------------
 	//Plane
 	//-------------------------------------------------
-	_Director.AddPlane(NAME_MGR::S_MAIN, NAME_MGR::P_MAIN, 0);
-	_Director.AddPlane(NAME_MGR::S_TYPE, NAME_MGR::P_TYPE, 0);
+	_Director.AddPlane(NAME_MGR::S_MAIN, NAME_MGR::P_MAIN_OPEN, 0);
+	_Director.AddPlane(NAME_MGR::S_MAIN, NAME_MGR::P_MAIN_MENU, 1);
+	_Director.AddPlane(NAME_MGR::S_MAIN, NAME_MGR::P_MAIN_TYPE, 2);
+	
 	_Director.AddPlane(NAME_MGR::S_MV, NAME_MGR::P_MV, 0);
 	_Director.AddPlane(NAME_MGR::S_KV, NAME_MGR::P_KV, 0);
 #pragma endregion
@@ -65,14 +65,12 @@ void MineshineTheatre::setupTheatre()
 	//Element
 	//-------------------------------------------------
 	//S_MAIN
-	_Director.AddElement(NAME_MGR::E_MAIN_BG, NAME_MGR::P_MAIN, NAME_MGR::A_MAIN_BG);
-	_Director.AddElement(NAME_MGR::E_QR, NAME_MGR::P_MAIN, NAME_MGR::A_QR, 1, ofPoint(515, 256));
-
-	//S_TYPE
-	_Director.AddElement(NAME_MGR::E_TYPE_BG, NAME_MGR::P_TYPE, NAME_MGR::A_TYPE_BG);
-	_Director.AddElement(NAME_MGR::E_TYPE_HOT, NAME_MGR::P_TYPE, NAME_MGR::A_TYPE_HOT, 2, ofPoint(0, 0), false);
-	_Director.AddElement(NAME_MGR::E_TYPE_WARM, NAME_MGR::P_TYPE, NAME_MGR::A_TYPE_WARM, 3, ofPoint(0, 0), false);
-	_Director.AddElement(NAME_MGR::E_TYPE_FRESH, NAME_MGR::P_TYPE, NAME_MGR::A_TYPE_FRESH, 4, ofPoint(0, 0), false);
+	_Director.AddElement(NAME_MGR::E_MAIN_LOOP, NAME_MGR::P_MAIN_OPEN, NAME_MGR::A_MAIN_LOOP);
+	_Director.AddElement(NAME_MGR::E_QR, NAME_MGR::P_MAIN_OPEN, NAME_MGR::A_QR, 1, ofPoint(515, 256), false);
+	_Director.AddElement(NAME_MGR::E_MENU_LOOP, NAME_MGR::P_MAIN_MENU, NAME_MGR::A_MENU_LOOP);
+	_Director.AddElement(NAME_MGR::E_TYPE_HOT_LOOP, NAME_MGR::P_MAIN_TYPE, NAME_MGR::A_TYPE_HOT_LOOP, 2, ofPoint(0, 0), false);
+	_Director.AddElement(NAME_MGR::E_TYPE_WARM_LOOP, NAME_MGR::P_MAIN_TYPE, NAME_MGR::A_TYPE_WARM_LOOP, 3, ofPoint(0, 0), false);
+	_Director.AddElement(NAME_MGR::E_TYPE_FRESH_LOOP, NAME_MGR::P_MAIN_TYPE, NAME_MGR::A_TYPE_FRESH_LOOP, 4, ofPoint(0, 0), false);
 
 	//S_MV
 	_Director.AddElement(NAME_MGR::E_MV, NAME_MGR::P_MV, NAME_MGR::A_MV_1);
@@ -91,14 +89,35 @@ void MineshineTheatre::setupTheatre()
 	//-------------------------------------------------	
 	//Video
 	ofxVideoElement* pVideoElement_ = nullptr;
+	_Director.GetElementPtr(NAME_MGR::E_MAIN_LOOP, pVideoElement_);
+	pVideoElement_->SetVideoAutoPlay(true);
+	pVideoElement_->SetVideoSubloop(61, false);
+	
+	_Director.GetElementPtr(NAME_MGR::E_MENU_LOOP, pVideoElement_);
+	pVideoElement_->SetVideoAutoPlay(false);
+	pVideoElement_->SetVideoSubloop(109, false);
+
+	_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, pVideoElement_);
+	pVideoElement_->SetVideoAutoPlay(false);
+	pVideoElement_->SetVideoSubloop(76, false);
+
+	_Director.GetElementPtr(NAME_MGR::E_TYPE_WARM_LOOP, pVideoElement_);
+	pVideoElement_->SetVideoAutoPlay(false);
+	pVideoElement_->SetVideoSubloop(76, false);
+
+	_Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH_LOOP, pVideoElement_);
+	pVideoElement_->SetVideoAutoPlay(false);
+	pVideoElement_->SetVideoSubloop(76, false);
+
 	_Director.GetElementPtr(NAME_MGR::E_MV, pVideoElement_);
 	pVideoElement_->StartEvent();
 	pVideoElement_->SetVideoAutoPlay(true);
+	
 #pragma endregion
 
 	_bWaitQRCode = true;
 	this->setupTimerTrigger();
-
+	this->TheatreAnimInit(NAME_MGR::S_MAIN);
 	ofAddListener(ofxTheatreEventArgs::TheatreEvent, this, &MineshineTheatre::onTheatreEvent);
 	_Director.Play();
 }
@@ -107,7 +126,16 @@ void MineshineTheatre::setupTheatre()
 void MineshineTheatre::updateTheatre(float fDelta)
 {
 	this->updateTimerTrigger(fDelta);
-	_Director.update();
+	int iFrame_ = 0;
+	
+	if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_MAIN)
+	{
+		ofxVideoElement* ptr_ = nullptr;
+		_Director.GetElementPtr(NAME_MGR::E_MAIN_LOOP, ptr_);
+
+		iFrame_ = ptr_->GetFrame();
+	}
+	_Director.update(iFrame_);
 }
 
 //--------------------------------------------------------------
@@ -134,15 +162,11 @@ void MineshineTheatre::nextScence()
 {
 	if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_MAIN)
 	{
-		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_NONE);
-	}
-	else if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_TYPE)
-	{
-		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_NONE);
+		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_FADE);
 	}
 	else if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_MV)
 	{
-		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_NONE);
+		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_FADE);
 	}
 	else if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_KV)
 	{
@@ -154,47 +178,65 @@ void MineshineTheatre::nextScence()
 void MineshineTheatre::TheatreAnimInit(string strName)
 {
 	ofxBaseElement* pElementPtr_ = nullptr;
-	if(strName == NAME_MGR::AS_HotTypeEnter)
+	if(strName == NAME_MGR::S_MAIN)
 	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT, pElementPtr_);
-		_Director.AddAnimation(NAME_MGR::S_TYPE, 0, new ofxEnterAnimation(NAME_MGR::ANIM_HotTypeEnter, pElementPtr_, eEnterType::eENTER_FROM_UP, cWINDOW_WIDTH, cWINDOW_HEIGHT));
-	}
-	else if(strName == NAME_MGR::AS_WarmTypeEnter)
-	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_WARM, pElementPtr_);
-		_Director.AddAnimation(NAME_MGR::S_TYPE, 0, new ofxEnterAnimation(NAME_MGR::ANIM_WarmTypeEnter, pElementPtr_, eEnterType::eENTER_FROM_UP, cWINDOW_WIDTH, cWINDOW_HEIGHT));
-	}
-	else if(strName == NAME_MGR::AS_FreshTypeEnter)
-	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH, pElementPtr_);
-		_Director.AddAnimation(NAME_MGR::S_TYPE, 0, new ofxEnterAnimation(NAME_MGR::ANIM_FreshTypeEnter, pElementPtr_, eEnterType::eENTER_FROM_UP, cWINDOW_WIDTH, cWINDOW_HEIGHT));
+		_Director.GetElementPtr(NAME_MGR::E_QR, pElementPtr_);
+		_Director.AddVideoAnimation(NAME_MGR::S_MAIN, new ofxFadeInAnimation(NAME_MGR::ANIM_QREnter, pElementPtr_, 53, 0.0));
 	}
 	else if(strName == NAME_MGR::AS_HotTypeExit)
 	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT, pElementPtr_);
-		_Director.AddAnimation(NAME_MGR::S_TYPE, 0, new ofxExitAnimation(NAME_MGR::ANIM_HotTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP, cWINDOW_WIDTH, cWINDOW_HEIGHT));
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, pElementPtr_);
+		_Director.AddAnimation(NAME_MGR::S_MAIN, 0, new ofxExitAnimation(NAME_MGR::ANIM_HotTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP, cWINDOW_WIDTH, cWINDOW_HEIGHT));
 	}
 	else if(strName == NAME_MGR::AS_WarmTypeExit)
 	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_WARM, pElementPtr_);
-		_Director.AddAnimation(NAME_MGR::S_TYPE, 0, new ofxExitAnimation(NAME_MGR::ANIM_WarmTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP,cWINDOW_WIDTH, cWINDOW_HEIGHT));
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, pElementPtr_);
+		_Director.AddAnimation(NAME_MGR::S_MAIN, 0, new ofxExitAnimation(NAME_MGR::ANIM_WarmTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP,cWINDOW_WIDTH, cWINDOW_HEIGHT));
 	}
 	else if(strName == NAME_MGR::AS_FreshTypeExit)
 	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH, pElementPtr_);
-		_Director.AddAnimation(NAME_MGR::S_TYPE, 0, new ofxExitAnimation(NAME_MGR::ANIM_FreshTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP,cWINDOW_WIDTH, cWINDOW_HEIGHT));
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, pElementPtr_);
+		_Director.AddAnimation(NAME_MGR::S_MAIN, 0, new ofxExitAnimation(NAME_MGR::ANIM_FreshTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP,cWINDOW_WIDTH, cWINDOW_HEIGHT));
 	}
 }
 
 //--------------------------------------------------------------
 void MineshineTheatre::onTheatreEvent(ofxTheatreEventArgs& e)
 {
+	//Scence
+	if(e.strMessage == NAME_MGR::S_MAIN)
+	{
+		this->TheatreAnimInit(NAME_MGR::S_MAIN);
+	}
+
 	//Element
 	if(e.strMessage == NAME_MGR::E_MV)
 	{
 		this->nextScence();
 	}
+
+	//Animation
+	if(e.strMessage == NAME_MGR::ANIM_HotTypeExit)
+	{
+		ofxVideoElement* ptr_ = nullptr;
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, ptr_);
+		ptr_->StopVideo();
+	}
+	else if(e.strMessage == NAME_MGR::ANIM_HotTypeExit)
+	{
+		ofxVideoElement* ptr_ = nullptr;
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_WARM_LOOP, ptr_);
+		ptr_->StopVideo();
+	}
+	else if(e.strMessage == NAME_MGR::ANIM_FreshTypeExit)
+	{
+		ofxVideoElement* ptr_ = nullptr;
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH_LOOP, ptr_);
+		ptr_->StopVideo();
+	}
+
 }
+
 #pragma endregion
 
 #pragma region QR Code

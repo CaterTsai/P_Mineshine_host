@@ -19,6 +19,8 @@ public:
 	void TheatreAnimInit(string strName);
 	void onTheatreEvent(ofxTheatreEventArgs& e);
 
+	void menuEnter();
+
 public:
 	ofxDirector		_Director;
 

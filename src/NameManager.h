@@ -16,20 +16,19 @@ namespace NAME_MGR
 // Scenes
 ///////////////////////////////////////
 	CREATE_VALUE(S_MAIN);
-	CREATE_VALUE(S_TYPE);
 	CREATE_VALUE(S_MV);
 	CREATE_VALUE(S_KV);
 
 ///////////////////////////////////////
 // Actor
 ///////////////////////////////////////
-	CREATE_VALUE(A_MAIN_BG);
+	CREATE_VALUE(A_MAIN_LOOP);
 	CREATE_VALUE(A_QR);
 
-	CREATE_VALUE(A_TYPE_BG);
-	CREATE_VALUE(A_TYPE_HOT);
-	CREATE_VALUE(A_TYPE_WARM);
-	CREATE_VALUE(A_TYPE_FRESH);
+	CREATE_VALUE(A_MENU_LOOP);
+	CREATE_VALUE(A_TYPE_HOT_LOOP);
+	CREATE_VALUE(A_TYPE_WARM_LOOP);
+	CREATE_VALUE(A_TYPE_FRESH_LOOP);	
 
 	CREATE_VALUE(A_MV_1);
 	CREATE_VALUE(A_MV_2);
@@ -50,21 +49,24 @@ namespace NAME_MGR
 ///////////////////////////////////////
 // Plane
 ///////////////////////////////////////
-	CREATE_VALUE(P_MAIN);
-	CREATE_VALUE(P_TYPE);
+	CREATE_VALUE(P_MAIN_OPEN);
+	CREATE_VALUE(P_MAIN_MENU);
+	CREATE_VALUE(P_MAIN_TYPE);
+
 	CREATE_VALUE(P_MV);
 	CREATE_VALUE(P_KV);
 	
 ///////////////////////////////////////
 // Element
 ///////////////////////////////////////
-	CREATE_VALUE(E_MAIN_BG);
+	CREATE_VALUE(E_MAIN_LOOP);
 	CREATE_VALUE(E_QR);
 
-	CREATE_VALUE(E_TYPE_BG);
-	CREATE_VALUE(E_TYPE_HOT);
-	CREATE_VALUE(E_TYPE_WARM);
-	CREATE_VALUE(E_TYPE_FRESH);
+	CREATE_VALUE(E_MENU_LOOP);
+
+	CREATE_VALUE(E_TYPE_HOT_LOOP);
+	CREATE_VALUE(E_TYPE_WARM_LOOP);
+	CREATE_VALUE(E_TYPE_FRESH_LOOP);
 
 	CREATE_VALUE(E_MV);
 
@@ -77,10 +79,7 @@ namespace NAME_MGR
 ///////////////////////////////////////
 // Theatre Animation Set
 ///////////////////////////////////////
-	CREATE_VALUE(AS_HotTypeEnter);
-	CREATE_VALUE(AS_WarmTypeEnter);
-	CREATE_VALUE(AS_FreshTypeEnter);
-
+	
 	CREATE_VALUE(AS_HotTypeExit);
 	CREATE_VALUE(AS_WarmTypeExit);
 	CREATE_VALUE(AS_FreshTypeExit);
@@ -88,9 +87,7 @@ namespace NAME_MGR
 ///////////////////////////////////////
 // Theatre Animation
 ///////////////////////////////////////	
-	CREATE_VALUE(ANIM_HotTypeEnter);
-	CREATE_VALUE(ANIM_WarmTypeEnter);
-	CREATE_VALUE(ANIM_FreshTypeEnter);
+	CREATE_VALUE(ANIM_QREnter);
 
 	CREATE_VALUE(ANIM_HotTypeExit);
 	CREATE_VALUE(ANIM_WarmTypeExit);

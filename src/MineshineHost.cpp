@@ -121,7 +121,10 @@ void MineshineHost::stateCheck()
 			if(_iNextState == 1)
 			{
 				_iNowState = _iNextState;
-				_Theatre.nextScence();
+				
+				ofxVideoElement* ptr_ = nullptr;
+				_Theatre._Director.GetElementPtr(NAME_MGR::E_MENU_LOOP, ptr_);
+				ptr_->PlayVideo();
 				break;
 			}
 			bNeedCatchState_ = true;
@@ -136,17 +139,26 @@ void MineshineHost::stateCheck()
 				{
 				case 1:
 					{	
-						_Theatre.TheatreAnimInit(NAME_MGR::AS_HotTypeEnter);
+						ofxVideoElement* ptr_ = nullptr;
+						_Theatre._Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, ptr_);
+						ptr_->SetVisible(true);
+						ptr_->PlayVideo();
 					}
 					break;
 				case 2:
 					{
-						_Theatre.TheatreAnimInit(NAME_MGR::AS_WarmTypeEnter);
+						ofxVideoElement* ptr_ = nullptr;
+						_Theatre._Director.GetElementPtr(NAME_MGR::E_TYPE_WARM_LOOP, ptr_);
+						ptr_->SetVisible(true);
+						ptr_->PlayVideo();
 					}
 					break;
 				case 3:
 					{
-						_Theatre.TheatreAnimInit(NAME_MGR::AS_FreshTypeEnter);
+						ofxVideoElement* ptr_ = nullptr;
+						_Theatre._Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH_LOOP, ptr_);
+						ptr_->SetVisible(true);
+						ptr_->PlayVideo();
 					}
 					break;
 				default:
