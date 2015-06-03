@@ -5,9 +5,11 @@
 #include "ofxXmlSettings.h"
 #include "ofxHttpUtils.h"
 #include "ofxQRcode.h"
+#include "ofxAnimatableFloat.h"
 
 #include "constParameter.h"
 #include "MineshineTheatre.h"
+#include "SlackReporter.h"
 
 #ifdef _DEBUG
 	#ifndef _JSON
@@ -28,10 +30,12 @@ public:
 	void update();
 	void draw();
 	void exit();
+	void reset();
 
 	void keyPressed(int key);
 
 private:
+	bool	_bShowMouse;
 	string	_TimeKey;
 	float	_fMainTimer;
 //-------------------------------------------------
@@ -42,9 +46,10 @@ private:
 	void drawBeforeTheatre();
 	void drawAfterTheatre();
 	void onTheatreEvent(string& e);
-	
+	void stateCheck();
 private:
 	MineshineTheatre	_Theatre;
+
 //-------------------------------------------------
 //DB Connection (PHP)
 //-------------------------------------------------
@@ -54,7 +59,7 @@ public:
 	void getInfo();
 	void onHttpResponse(ofxHttpResponse& response);
 		
-	void stateCheck();
+	
 private:
 	int				_iNowState, _iNextState, _iSongID, _iType;
 	int				_TmpType;
@@ -63,6 +68,26 @@ private:
 
 	float			_fCheckTimer;
 	ofxQRcode		_QRCode;
+
+//-------------------------------------------------
+//BGM
+//-------------------------------------------------
+public:
+	void setupBGM();
+	void updateBGM(float fDelta);
+	void FadeoutBGM();
+	void FadeinBGM();
+
+private:
+	bool				_bFade;
+	ofxAnimatableFloat	_AnimVol;
+	ofSoundPlayer		_BGM;
+//-------------------------------------------------
+//Slack
+//-------------------------------------------------
+public:
+	float			_fKeepAlive;
+	SlackReporter	_Slack;
 
 //-------------------------------------------------
 //Config file
@@ -74,4 +99,6 @@ private:
 	int	_exHostID;
 	string	_exMobileUrl;
 	string	_exActiveUrl;
+	bool	_exCanSkip;
+	bool	_exSlack;
 };

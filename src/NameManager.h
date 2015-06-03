@@ -17,7 +17,6 @@ namespace NAME_MGR
 ///////////////////////////////////////
 	CREATE_VALUE(S_MAIN);
 	CREATE_VALUE(S_MV);
-	CREATE_VALUE(S_KV);
 
 ///////////////////////////////////////
 // Actor
@@ -44,8 +43,6 @@ namespace NAME_MGR
 	CREATE_VALUE(A_MV_12);
 	CREATE_VALUE(A_MV_13);
 
-	CREATE_VALUE(A_KV);
-
 ///////////////////////////////////////
 // Plane
 ///////////////////////////////////////
@@ -54,7 +51,6 @@ namespace NAME_MGR
 	CREATE_VALUE(P_MAIN_TYPE);
 
 	CREATE_VALUE(P_MV);
-	CREATE_VALUE(P_KV);
 	
 ///////////////////////////////////////
 // Element
@@ -69,8 +65,6 @@ namespace NAME_MGR
 	CREATE_VALUE(E_TYPE_FRESH_LOOP);
 
 	CREATE_VALUE(E_MV);
-
-	CREATE_VALUE(E_KV);
 
 ///////////////////////////////////////
 // Translate
@@ -96,7 +90,7 @@ namespace NAME_MGR
 ///////////////////////////////////////
 // Event
 ///////////////////////////////////////
-	CREATE_VALUE(EVENT_ENABLE_LISTEN_STATE);
+	CREATE_VALUE(EVENT_Reset);
 };
 
 #endif // !MINESHINE_NAME_MANAGER

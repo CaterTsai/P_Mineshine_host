@@ -7,6 +7,8 @@ void MineshineHost::setup()
 	ofBackground(0);
 	ofSetVerticalSync(true);
 
+	ofLogToFile(ofGetTimestampString("Log_%m%d.txt"), true);
+
 	//loading config file
 	if(!this->loadconfig())
 	{
@@ -14,18 +16,33 @@ void MineshineHost::setup()
 		std::exit(-1);
 	}
 
+	//BGM
+	this->setupBGM();
+	_BGM.play();
+
 	//DB Connector
-	_iNowState = 0;
-	_iNextState = _iSongID = _iType = -1;
-	_bIsCheckQRCodeOK = false;
 	this->setupDBConnector();
-	_TimeKey =  ofToString(_exHostID) + ofGetTimestampString("%m%d%H%M");
-	this->addNewQRCode();
 
 	//Theatre
 	this->initTheatre();
 	
+	//initial
+	this->reset();
+
+	//slack reporter initial
+	if(_exSlack)
+	{
+		_Slack.setup();
+	}
+	_Slack.Report("[Slack] Program start, Host ID:" + ofToString(_exHostID));
+	_fKeepAlive = cKEEP_ALIVE_TIMER;
+
+	_fCheckTimer = cCHECK_TIME;
 	_fMainTimer = ofGetElapsedTimef();
+
+	_bShowMouse = false;
+	ofHideCursor();
+	ofToggleFullscreen();
 }
 
 //--------------------------------------------------------------
@@ -49,11 +66,20 @@ void MineshineHost::update()
 	{
 		this->stateCheck();
 		_fCheckTimer = cCHECK_TIME;
+	}	
+
+	//BGM
+	this->updateBGM(fDelta_);
+
+	//Keep Alive
+	_fKeepAlive -= fDelta_;
+	if(_fKeepAlive <= 0.0)
+	{
+		_Slack.Report("[KEEP-ALIVE]Host ID:" + ofToString(_exHostID));
+		_fKeepAlive = cKEEP_ALIVE_TIMER;
 	}
-	
 
 	_Theatre.updateTheatre(fDelta_);
-
 	ofSetWindowTitle(ofToString(ofGetFrameRate()));
 }
 
@@ -64,23 +90,43 @@ void MineshineHost::draw()
 }
 
 //--------------------------------------------------------------
+void MineshineHost::exit()
+{
+	_DBConnector.stop();
+	_Slack.exit();
+}
+
+//--------------------------------------------------------------
+void MineshineHost::reset()
+{	
+	_iNowState = 0;
+	_iNextState = _iSongID = _iType = -1;
+	_bIsCheckQRCodeOK = false;
+	_TimeKey =  ofToString(_exHostID) + ofGetTimestampString("%d%H%M%S");
+	this->addNewQRCode();
+	this->FadeinBGM();
+}
+
+//--------------------------------------------------------------
 void MineshineHost::keyPressed(int key)
 {
 	switch(key)
 	{
-	case 'q':
+	case 'r':
 		{
-			_TimeKey = ofGetTimestampString("%m%d%H%M") + ofToString(_exHostID);
-			this->addNewQRCode();
+			_Theatre.CanSetQR();
+			this->reset();
+			break;
+		}
+	case 'f':
+		{
+			_bShowMouse?ofHideCursor():ofShowCursor();
+			_bShowMouse ^= true;
+
+			ofToggleFullscreen();
 			break;
 		}
 	}
-}
-
-//--------------------------------------------------------------
-void MineshineHost::exit()
-{
-	_DBConnector.stop();
 }
 
 #pragma endregion
@@ -107,7 +153,10 @@ void MineshineHost::drawAfterTheatre()
 //--------------------------------------------------------------
 void MineshineHost::onTheatreEvent(string& e)
 {
-
+	if(e == NAME_MGR::EVENT_Reset)
+	{
+		this->reset();
+	}
 }
 
 //--------------------------------------------------------------
@@ -125,6 +174,13 @@ void MineshineHost::stateCheck()
 				ofxVideoElement* ptr_ = nullptr;
 				_Theatre._Director.GetElementPtr(NAME_MGR::E_MENU_LOOP, ptr_);
 				ptr_->PlayVideo();
+				break;
+			}
+			if(_exCanSkip && _iNextState == 3  && _Theatre.setMV(_iSongID))
+			{
+				_iNowState = _iNextState;
+				_Theatre.nextScence();
+				this->FadeoutBGM();
 				break;
 			}
 			bNeedCatchState_ = true;
@@ -203,15 +259,14 @@ void MineshineHost::stateCheck()
 					}
 				}
 				_iNowState = _iNextState;
-				break;
-				
+				break;				
 			}
-
 
 			if(_iNextState == 3 && _Theatre.setMV(_iSongID))
 			{
 				_iNowState = _iNextState;
 				_Theatre.nextScence();
+				this->FadeoutBGM();
 				break;
 			}
 			bNeedCatchState_ = true;
@@ -295,6 +350,49 @@ void MineshineHost::onHttpResponse(ofxHttpResponse& response)
 }
 #pragma endregion
 
+#pragma region BGM
+void MineshineHost::setupBGM()
+{
+	_BGM.loadSound("audios/bgm.mp3");
+	_BGM.setLoop(true);
+	_BGM.setVolume(0.0);
+
+	_bFade = false;
+	_AnimVol.setDuration(cBGM_FADE_TIME);
+	_AnimVol.reset(0.0);
+}
+
+//--------------------------------------------------------------
+void MineshineHost::updateBGM(float fDelta)
+{
+	_AnimVol.update(fDelta);
+
+	if(_bFade)
+	{
+		_BGM.setVolume(_AnimVol.getCurrentValue());
+
+		if(_AnimVol.hasFinishedAnimating() && _AnimVol.getPercentDone() == 1.0)
+		{
+			_bFade = false;
+		}
+	}
+}
+
+//--------------------------------------------------------------
+void MineshineHost::FadeoutBGM()
+{
+	_bFade = true;
+	_AnimVol.animateFromTo(1.0, 0.0);
+}
+
+//--------------------------------------------------------------
+void MineshineHost::FadeinBGM()
+{
+	_bFade = true;
+	_AnimVol.animateFromTo(0.0, 1.0);
+}
+#pragma endregion
+
 #pragma region Config file
 bool MineshineHost::loadconfig()
 {
@@ -308,7 +406,8 @@ bool MineshineHost::loadconfig()
 	_exHostID = config_.getValue("HOSTID", -1, 0);
 	_exMobileUrl = config_.getValue("MOBILE_URL", "", 0);
 	_exActiveUrl = config_.getValue("ACTIVE_URL", "", 0);
-
+	_exCanSkip = (config_.getValue("CAN_SKIP", 0, 0) == 1);
+	_exSlack = (config_.getValue("SLACK", 0, 0) == 1);
 
 	if(_exHostID == -1 || _exMobileUrl == "" || _exActiveUrl == "")
 	{

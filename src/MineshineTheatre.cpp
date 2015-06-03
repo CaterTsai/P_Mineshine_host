@@ -12,7 +12,6 @@ void MineshineTheatre::setupTheatre()
 	//-------------------------------------------------
 	_Director.AddScenes(NAME_MGR::S_MAIN);
 	_Director.AddScenes(NAME_MGR::S_MV);
-	_Director.AddScenes(NAME_MGR::S_KV);
 #pragma endregion
 
 #pragma region Actor
@@ -43,9 +42,7 @@ void MineshineTheatre::setupTheatre()
 	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_MV_11, "mv/11.mp4", ofPtr<ofGstVideoPlayer>(new ofGstVideoPlayer)));
 	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_MV_12, "mv/12.mp4", ofPtr<ofGstVideoPlayer>(new ofGstVideoPlayer)));
 	_Director.AddActor(new ofxVideoActor(NAME_MGR::A_MV_13, "mv/13.mp4", ofPtr<ofGstVideoPlayer>(new ofGstVideoPlayer)));
-	
-	//S_KV
-	_Director.AddActor(new ofxImageActor(NAME_MGR::A_KV, "images/kv.jpg"));
+
 #pragma endregion
 
 #pragma region Plane
@@ -57,7 +54,6 @@ void MineshineTheatre::setupTheatre()
 	_Director.AddPlane(NAME_MGR::S_MAIN, NAME_MGR::P_MAIN_TYPE, 2);
 	
 	_Director.AddPlane(NAME_MGR::S_MV, NAME_MGR::P_MV, 0);
-	_Director.AddPlane(NAME_MGR::S_KV, NAME_MGR::P_KV, 0);
 #pragma endregion
 
 #pragma region Element
@@ -74,9 +70,6 @@ void MineshineTheatre::setupTheatre()
 
 	//S_MV
 	_Director.AddElement(NAME_MGR::E_MV, NAME_MGR::P_MV, NAME_MGR::A_MV_1);
-	
-	//S_KV
-	_Director.AddElement(NAME_MGR::E_KV, NAME_MGR::P_KV, NAME_MGR::A_KV);
 #pragma endregion
 
 #pragma region Translate Element
@@ -152,9 +145,11 @@ void MineshineTheatre::drawTheatre()
 //--------------------------------------------------------------
 void MineshineTheatre::resetTheatre()
 {
-	_bWaitQRCode = true;
+	string strEventMsg_ = NAME_MGR::EVENT_Reset;
+	ofNotifyEvent(MineshineTheaterEvent, strEventMsg_, this);
 
-	_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_NONE);
+	_bWaitQRCode = true;
+	_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_FADE);
 }
 
 //--------------------------------------------------------------
@@ -162,13 +157,9 @@ void MineshineTheatre::nextScence()
 {
 	if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_MAIN)
 	{
-		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_FADE);
+		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_NONE);
 	}
 	else if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_MV)
-	{
-		_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_FADE);
-	}
-	else if(_Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_KV)
 	{
 		this->resetTheatre();
 	}
@@ -190,12 +181,12 @@ void MineshineTheatre::TheatreAnimInit(string strName)
 	}
 	else if(strName == NAME_MGR::AS_WarmTypeExit)
 	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, pElementPtr_);
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_WARM_LOOP, pElementPtr_);
 		_Director.AddAnimation(NAME_MGR::S_MAIN, 0, new ofxExitAnimation(NAME_MGR::ANIM_WarmTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP,cWINDOW_WIDTH, cWINDOW_HEIGHT));
 	}
 	else if(strName == NAME_MGR::AS_FreshTypeExit)
 	{
-		_Director.GetElementPtr(NAME_MGR::E_TYPE_HOT_LOOP, pElementPtr_);
+		_Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH_LOOP, pElementPtr_);
 		_Director.AddAnimation(NAME_MGR::S_MAIN, 0, new ofxExitAnimation(NAME_MGR::ANIM_FreshTypeExit, pElementPtr_, eExitType::eEXIT_TO_UP,cWINDOW_WIDTH, cWINDOW_HEIGHT));
 	}
 }
@@ -212,7 +203,13 @@ void MineshineTheatre::onTheatreEvent(ofxTheatreEventArgs& e)
 	//Element
 	if(e.strMessage == NAME_MGR::E_MV)
 	{
-		this->nextScence();
+		this->addTimerTrigger(
+			cWAIT_TO_REST,
+			[](MineshineTheatre* Theatre)
+			{
+				Theatre->resetTheatre();
+			}
+		);
 	}
 
 	//Animation
@@ -234,7 +231,6 @@ void MineshineTheatre::onTheatreEvent(ofxTheatreEventArgs& e)
 		_Director.GetElementPtr(NAME_MGR::E_TYPE_FRESH_LOOP, ptr_);
 		ptr_->StopVideo();
 	}
-
 }
 
 #pragma endregion
