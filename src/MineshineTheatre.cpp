@@ -149,7 +149,8 @@ void MineshineTheatre::resetTheatre()
 	ofNotifyEvent(MineshineTheaterEvent, strEventMsg_, this);
 
 	_bWaitQRCode = true;
-	_Director.TransitTo(TRANSITION_TYPE::eTRANSITION_FADE);
+	_Director.Replay();
+	this->TheatreAnimInit(NAME_MGR::S_MAIN);
 }
 
 //--------------------------------------------------------------

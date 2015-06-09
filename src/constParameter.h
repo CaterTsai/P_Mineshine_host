@@ -6,6 +6,7 @@
 
 const static int cWINDOW_WIDTH = 1280;
 const static int cWINDOW_HEIGHT = 720;
+const static int cTIMEOUT = 60;
 
 //PHP active name
 const static string cADD_NEW_QRCODE = "new_qr";
@@ -14,7 +15,8 @@ const static float cCHECK_TIME = 1.0;
 
 //BGM
 const static float cBGM_FADE_TIME = 1.0;
-
+//const static float cMINESHINE_MUSIC = 15;
+const static float cMINESHINE_MUSIC = 60 * 10;
 //QR code
 const static int cQR_SIZE = 235;
 

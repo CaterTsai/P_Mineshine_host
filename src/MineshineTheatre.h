@@ -36,6 +36,11 @@ public:
 		return _bWaitQRCode && _Director.GetNowScenes()->GetScenesName() == NAME_MGR::S_MAIN;
 	}
 
+	inline void WaitQRCode()
+	{
+		_bWaitQRCode = true;
+	}
+
 private:
 	bool	_bWaitQRCode;
 

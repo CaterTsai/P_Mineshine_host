@@ -38,6 +38,7 @@ private:
 	bool	_bShowMouse;
 	string	_TimeKey;
 	float	_fMainTimer;
+	float	_fTimeout;
 //-------------------------------------------------
 //Theatre
 //-------------------------------------------------
@@ -58,7 +59,6 @@ public:
 	void addNewQRCode();
 	void getInfo();
 	void onHttpResponse(ofxHttpResponse& response);
-		
 	
 private:
 	int				_iNowState, _iNextState, _iSongID, _iType;
@@ -74,14 +74,21 @@ private:
 //-------------------------------------------------
 public:
 	void setupBGM();
-	void updateBGM(float fDelta);
+	void updateBGM(float fDelta, bool bUpdate = true);
+	void stopBGM();
+	void resetBGM();
+
+private:
 	void FadeoutBGM();
 	void FadeinBGM();
 
 private:
-	bool				_bFade;
+	bool				_bIsMineshineMusic, _bFade;
+	float				_fBGMTimer;
 	ofxAnimatableFloat	_AnimVol;
-	ofSoundPlayer		_BGM;
+
+	ofSoundPlayer		_BGM, _MineshineMusic;
+
 //-------------------------------------------------
 //Slack
 //-------------------------------------------------

@@ -18,7 +18,6 @@ void MineshineHost::setup()
 
 	//BGM
 	this->setupBGM();
-	_BGM.play();
 
 	//DB Connector
 	this->setupDBConnector();
@@ -43,6 +42,8 @@ void MineshineHost::setup()
 	_bShowMouse = false;
 	ofHideCursor();
 	ofToggleFullscreen();
+	_BGM.play();
+
 }
 
 //--------------------------------------------------------------
@@ -60,6 +61,7 @@ void MineshineHost::update()
 		}
 	}
 
+
 	//Check state
 	_fCheckTimer -= fDelta_;
 	if(_fCheckTimer <= 0.0)
@@ -69,7 +71,24 @@ void MineshineHost::update()
 	}	
 
 	//BGM
-	this->updateBGM(fDelta_);
+	if(_iNowState == 0)
+	{
+		this->updateBGM(fDelta_);
+	}
+	else
+	{
+		this->updateBGM(fDelta_, false);
+	}
+	
+	//Timeout
+	if(_iNowState > 0 && _iNowState <= 2) //Type & song
+	{
+		_fTimeout -= fDelta_;
+		if(_fTimeout <= 0.0)
+		{
+			_Theatre.resetTheatre();
+		}
+	}
 
 	//Keep Alive
 	_fKeepAlive -= fDelta_;
@@ -103,8 +122,9 @@ void MineshineHost::reset()
 	_iNextState = _iSongID = _iType = -1;
 	_bIsCheckQRCodeOK = false;
 	_TimeKey =  ofToString(_exHostID) + ofGetTimestampString("%d%H%M%S");
+	_fTimeout = cTIMEOUT;
 	this->addNewQRCode();
-	this->FadeinBGM();
+	this->resetBGM();
 }
 
 //--------------------------------------------------------------
@@ -114,8 +134,7 @@ void MineshineHost::keyPressed(int key)
 	{
 	case 'r':
 		{
-			_Theatre.CanSetQR();
-			this->reset();
+			_Theatre.resetTheatre();
 			break;
 		}
 	case 'f':
@@ -180,7 +199,7 @@ void MineshineHost::stateCheck()
 			{
 				_iNowState = _iNextState;
 				_Theatre.nextScence();
-				this->FadeoutBGM();
+				this->stopBGM();
 				break;
 			}
 			bNeedCatchState_ = true;
@@ -266,7 +285,7 @@ void MineshineHost::stateCheck()
 			{
 				_iNowState = _iNextState;
 				_Theatre.nextScence();
-				this->FadeoutBGM();
+				this->stopBGM();
 				break;
 			}
 			bNeedCatchState_ = true;
@@ -345,7 +364,7 @@ void MineshineHost::onHttpResponse(ofxHttpResponse& response)
 	}
 	else
 	{
-		ofLog(OF_LOG_WARNING, "[MineshineHost]Unknow active name : " + Active_);
+		ofLog(OF_LOG_WARNING, "[MineshineHost]Post error : " + response.reasonForStatus);
 	}
 }
 #pragma endregion
@@ -354,18 +373,46 @@ void MineshineHost::onHttpResponse(ofxHttpResponse& response)
 void MineshineHost::setupBGM()
 {
 	_BGM.loadSound("audios/bgm.mp3");
-	_BGM.setLoop(true);
-	_BGM.setVolume(0.0);
+	_BGM.setLoop(true);	
 
-	_bFade = false;
+	_MineshineMusic.loadSound("audios/mineshine_music.mp3");
+	_MineshineMusic.setLoop(false);
+
+	_bIsMineshineMusic = _bFade = false;
+
 	_AnimVol.setDuration(cBGM_FADE_TIME);
-	_AnimVol.reset(0.0);
+	_AnimVol.reset(1.0);
+
+	_fBGMTimer = cMINESHINE_MUSIC;
 }
 
 //--------------------------------------------------------------
-void MineshineHost::updateBGM(float fDelta)
+void MineshineHost::updateBGM(float fDelta, bool bUpdate)
 {
 	_AnimVol.update(fDelta);
+
+	if(bUpdate && !_bIsMineshineMusic)
+	{
+		_fBGMTimer -= fDelta;
+
+		if(_fBGMTimer <= 0)
+		{
+			this->FadeoutBGM();
+			_MineshineMusic.play();
+			_bIsMineshineMusic = true;
+		}
+	}
+
+	if(_bIsMineshineMusic)
+	{
+		if(abs(_MineshineMusic.getPosition() - 1.0) < 0.01)
+		{
+			_bIsMineshineMusic = false;
+			_fBGMTimer = cMINESHINE_MUSIC;
+			_MineshineMusic.stop();
+			this->FadeinBGM();
+		}
+	}
 
 	if(_bFade)
 	{
@@ -376,6 +423,36 @@ void MineshineHost::updateBGM(float fDelta)
 			_bFade = false;
 		}
 	}
+}
+
+//--------------------------------------------------------------
+void MineshineHost::stopBGM()
+{
+	if(_bIsMineshineMusic)
+	{
+		_MineshineMusic.stop();
+	}
+	else
+	{
+		this->FadeoutBGM();
+	}
+}
+
+//--------------------------------------------------------------
+void MineshineHost::resetBGM()
+{
+	_BGM.stop();
+	_BGM.setVolume(1.0);
+	_BGM.play();
+	_BGM.setLoop(true);
+
+	_MineshineMusic.stop();
+	
+
+	_fBGMTimer = cMINESHINE_MUSIC;
+
+	_bIsMineshineMusic = _bFade = false;
+	_AnimVol.reset(1.0);
 }
 
 //--------------------------------------------------------------
