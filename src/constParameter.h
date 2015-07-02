@@ -11,7 +11,7 @@ const static int cTIMEOUT = 60;
 //PHP active name
 const static string cADD_NEW_QRCODE = "new_qr";
 const static string cCHECK_DB = "check";
-const static float cCHECK_TIME = 1.0;
+const static float cCHECK_TIME = 1.5;
 
 //BGM
 const static float cBGM_FADE_TIME = 1.0;

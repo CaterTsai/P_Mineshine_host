@@ -53,14 +53,17 @@ void MineshineHost::update()
 	_fMainTimer += fDelta_;
 
 	//Set qr code
-	if(_bIsCheckQRCodeOK && _Theatre.CanSetQR())
+	if(_bIsCheckQRCodeOK && _Theatre.CanSetQR() && _QRCode.IsGotQR())
 	{
-		if(_QRCode.IsGotQR())
+		if(_QRCode.getWidth() == cQR_SIZE)
 		{
 			_Theatre.setQRCodeImg(_QRCode);
 		}
+		else
+		{
+			_QRCode.fetch(_exMobileUrl + _TimeKey, cQR_SIZE);
+		}
 	}
-
 
 	//Check state
 	_fCheckTimer -= fDelta_;
